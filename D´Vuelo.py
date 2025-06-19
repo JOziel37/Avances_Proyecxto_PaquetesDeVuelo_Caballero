@@ -132,19 +132,19 @@ class Volando:
     def presupuesto(self):
         while True:
             try:
-                self._presupuesto = float(input("Ingrese su presupuesto: "))
+                self._presupuesto = float(input("Ingrese su presupuesto: (PMX) "))
                 break
             except ValueError:
                 print("Ingresa un valor numérico válido para el presupuesto.")
             
-        if self._presupuesto < 7500:
+        if self._presupuesto < 8364:
             self.aeropuertos()
             self.menu()
             if self._aeropuerto == "1":
                 self.asignacionAIFA()
             elif self._aeropuerto == "2":
                 self.asignacionAICM()
-        elif self._presupuesto >= 7500:
+        elif self._presupuesto >= 8364:
             self.vuelosrapidos() 
         else:
             print("Ingresa caracteres válidos.")
