@@ -1,0 +1,69 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36" version="27.1.6">
+  <diagram name="Página-1" id="o5m03eZORQLKc1EOb_4b">
+    <mxGraphModel dx="744" dy="407" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="J1vWrAtoHqEQ6TX_wkZ_-7" value="&lt;div style=&quot;background-color: rgb(255, 255, 254); font-family: Consolas, &amp;quot;Courier New&amp;quot;, monospace; font-weight: normal; font-size: 14px; line-height: 19px; white-space: pre;&quot;&gt;Volando&lt;/div&gt;" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="239" y="190" width="160" height="950" as="geometry" />
+        </mxCell>
+        <mxCell id="J1vWrAtoHqEQ6TX_wkZ_-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="J1vWrAtoHqEQ6TX_wkZ_-7" source="J1vWrAtoHqEQ6TX_wkZ_-8" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="250" y="39" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="J1vWrAtoHqEQ6TX_wkZ_-8" value="&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoNormal&quot;&gt;_aeropuerto &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoNormal&quot;&gt;_vueloAIFA &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoNormal&quot;&gt;_vueloAICM &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoNormal&quot;&gt;_presupuesto &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoNormal&quot;&gt;_vuelosrapidos&lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoNormal&quot;&gt;rutas_precargadas &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoNormal&quot;&gt;carga_finalizada &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoNormal&quot;&gt;aifa_destinos &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoNormal&quot;&gt;aifa_rutas &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoNormal&quot;&gt;aicm_destinos &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoNormal&quot;&gt;aicm_rutas &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoNormal&quot;&gt;destinos_vuelos_rapidos &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoNormal&quot;&gt;vuelos_rapidos_mapa_aristas &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoNormal&quot;&gt;vuelos_rapidos_mapa_nodos &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoNormal&quot;&gt;puntos_inicio_vuelos_rapidos&lt;/p&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="J1vWrAtoHqEQ6TX_wkZ_-7" vertex="1">
+          <mxGeometry y="40" width="160" height="430" as="geometry" />
+        </mxCell>
+        <mxCell id="J1vWrAtoHqEQ6TX_wkZ_-9" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" parent="J1vWrAtoHqEQ6TX_wkZ_-7" vertex="1">
+          <mxGeometry y="470" width="160" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="J1vWrAtoHqEQ6TX_wkZ_-10" value="&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoListParagraphCxSpFirst&quot;&gt;__init__() &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoListParagraphCxSpMiddle&quot;&gt;_obtener_entrada_usuario(prompt,&lt;br&gt;opciones_validas) &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoListParagraphCxSpMiddle&quot;&gt;_precargar_datos()&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoListParagraphCxSpMiddle&quot;&gt;presupuesto() &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoListParagraphCxSpMiddle&quot;&gt;aeropuertos() &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoListParagraphCxSpMiddle&quot;&gt;menu() &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoListParagraphCxSpMiddle&quot;&gt;asignacionAIFA()&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoListParagraphCxSpMiddle&quot;&gt;asignacionAICM()&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoListParagraphCxSpMiddle&quot;&gt;vuelosrapidos() &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoListParagraphCxSpMiddle&quot;&gt;menu_rapido() &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoListParagraphCxSpMiddle&quot;&gt;destinosguardados()&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoListParagraphCxSpMiddle&quot;&gt;mostrar_grafo(g,&lt;br&gt;aeropuerto)&lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoListParagraphCxSpMiddle&quot;&gt;mostrar_rutarapida(g,&lt;br&gt;source, target) &lt;/p&gt;&lt;p style=&quot;text-align:justify&quot; class=&quot;MsoListParagraphCxSpLast&quot;&gt;mostrar_ruta_en_grafo(g,&lt;br&gt;source, target)&lt;/p&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="J1vWrAtoHqEQ6TX_wkZ_-7" vertex="1">
+          <mxGeometry y="478" width="160" height="472" as="geometry" />
+        </mxCell>
+        <mxCell id="J1vWrAtoHqEQ6TX_wkZ_-14" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.04;entryY=0.667;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.994;exitY=0.049;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="398.99999999999994" y="226.53999999999996" as="sourcePoint" />
+            <mxPoint x="486.96" y="160" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="439.96" y="169.99" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="J1vWrAtoHqEQ6TX_wkZ_-20" value="Clase" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="484" y="150" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="J1vWrAtoHqEQ6TX_wkZ_-23" value="Atributos" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="484" y="210" width="70" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="J1vWrAtoHqEQ6TX_wkZ_-24" value="Métodos" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="550" y="880" width="70" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="J1vWrAtoHqEQ6TX_wkZ_-25" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="399" y="694.64" as="sourcePoint" />
+            <mxPoint x="459" y="694.64" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="J1vWrAtoHqEQ6TX_wkZ_-26" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;Constructor&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="449" y="680" width="70" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="pLWncL3W1dyKWlqIHVuF-3" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="399" y="904" as="sourcePoint" />
+            <mxPoint x="539" y="900" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SfAN-PZdpVoeb66SGOA3-3" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="399" y="1110" as="sourcePoint" />
+            <mxPoint x="459" y="1110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SfAN-PZdpVoeb66SGOA3-4" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;&lt;b&gt;destructor&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="474" y="1090" width="60" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
