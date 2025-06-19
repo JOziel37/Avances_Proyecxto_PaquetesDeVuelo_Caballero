@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import messagebox
 import networkx as nx
 import matplotlib.pyplot as plt
+import threading
+import time 
 
 class Volando:
     def __init__(self):
@@ -11,7 +13,122 @@ class Volando:
         self._vueloAICM = None
         self._presupuesto = None
         self._vuelosrapidos = None
+        
+        self.rutas_precargadas = {} 
+        self.carga_finalizada = False
+
+        self.aifa_destinos = {
+            "a": "Acapulco",
+            "b": "Bogotá-Colombia",
+            "c": "Ciudad Juárez",
+            "d": "Monterrey",
+            "e": "Ciudad de México",
+            "f": "Guadalajara",
+            "g": "Zacatecas",
+            "h": "Puerto Vallarta",
+            "i": "Mazatlán"
+        }
+        self.aifa_rutas = {
+            "a": [('AIFA', 'Acapulco', 5)],
+            "b": [('AIFA', 'Bogotá-Colombia', 3)],
+            "c": [('AIFA', 'Ciudad Juárez', 6)],
+            "d": [('AIFA', 'Acapulco', 5), ('Acapulco', 'Monterrey', 2)],
+            "e": [('AIFA', 'Acapulco', 5), ('Acapulco', 'Ciudad de México', 3)],
+            "f": [('AIFA', 'Bogotá-Colombia', 3), ('Bogotá-Colombia', 'Guadalajara', 4)],
+            "g": [('AIFA', 'Bogotá-Colombia', 3), ('Bogotá-Colombia', 'Zacatecas', 1)],
+            "h": [('AIFA', 'Ciudad Juárez', 6), ('Ciudad Juárez', 'Puerto Vallarta', 3)],
+            "i": [('AIFA', 'Ciudad Juárez', 6), ('Ciudad Juárez', 'Mazatlán', 3)]
+        }
+        self.aifa_mapa_completo_aristas = [
+            ('AIFA','Acapulco'), ('AIFA','Bogotá-Colombia'), ('AIFA','Ciudad Juárez'),
+            ('Acapulco','Monterrey'), ('Acapulco','Ciudad de México'),
+            ('Bogotá-Colombia','Guadalajara'), ('Bogotá-Colombia','Zacatecas'),
+            ('Ciudad Juárez','Puerto Vallarta'), ('Ciudad Juárez','Mazatlán'),
+            ('Monterrey','Ciudad de México'), ('Ciudad de México','Guadalajara'),
+            ('Guadalajara','Zacatecas'), ('Zacatecas','Puerto Vallarta'),
+            ('Puerto Vallarta','Mazatlán')
+        ]
+        self.aifa_mapa_completo_nodos = ['AIFA','Acapulco','Bogotá-Colombia','Ciudad Juárez','Monterrey','Ciudad de México','Guadalajara','Zacatecas','Puerto Vallarta','Mazatlán']
+
+
+        self.aicm_destinos = {
+            "a": "Monterrey",
+            "b": "Zacatecas",
+            "c": "Puerto Vallarta",
+            "d": "Guadalajara",
+            "e": "Ciudad Juárez",
+            "f": "Ciudad de México",
+            "g": "Bogotá-Colombia",
+            "h": "Acapulco",
+            "i": "Cancún"
+        }
+        self.aicm_rutas = {
+            "a": [('AICM', 'Monterrey', 3)],
+            "b": [('AICM', 'Zacatecas', 3)],
+            "c": [('AICM', 'Puerto Vallarta', 2)],
+            "d": [('AICM', 'Monterrey', 3), ('Monterrey', 'Guadalajara', 2)],
+            "e": [('AICM', 'Monterrey', 3), ('Monterrey', 'Ciudad Juárez', 4)],
+            "f": [('AICM', 'Zacatecas', 3), ('Zacatecas', 'Ciudad de México', 5)],
+            "g": [('AICM', 'Zacatecas', 3), ('Zacatecas', 'Bogotá-Colombia', 6)],
+            "h": [('AICM', 'Puerto Vallarta', 2), ('Puerto Vallarta', 'Acapulco', 7)],
+            "i": [('AICM', 'Puerto Vallarta', 2), ('Puerto Vallarta', 'Cancún', 2)]
+        }
+        self.aicm_mapa_completo_aristas = [
+            ('AICM','Monterrey'), ('Monterrey','Guadalajara'), ('Monterrey','Ciudad Juárez'),
+            ('Guadalajara','Ciudad Juárez'), ('AICM','Zacatecas'),
+            ('Zacatecas','Ciudad de México'), ('Zacatecas','Bogotá-Colombia'),
+            ('Ciudad de México','Bogotá-Colombia'), ('AICM','Puerto Vallarta'),
+            ('Puerto Vallarta','Acapulco'), ('Puerto Vallarta','Cancún'),
+            ('Acapulco','Cancún'), ('Ciudad Juárez','Ciudad de México'),
+            ('Bogotá-Colombia','Acapulco')
+        ]
+        self.aicm_mapa_completo_nodos = ['AICM','Monterrey','Zacatecas','Puerto Vallarta','Guadalajara','Ciudad Juárez','Ciudad de México','Bogotá-Colombia','Acapulco','Cancún']
+
+
+        self.destinos_vuelos_rapidos = {
+            "a": "Monterrey", "b": "Zacatecas", "c": "Puerto Vallarta",
+            "d": "Guadalajara", "e": "Ciudad Juárez", "f": "Bogotá-Colombia",
+            "g": "Acapulco", "h": "Cancún", "i": "Mazatlán",
+            "j": "Ciudad de México", "k": "Estado de México"
+        }
+        self.vuelos_rapidos_mapa_aristas = [
+            ('AICM','AIFA', 1), ('AICM','Zacatecas', 3), ('AICM','Cancún', 2), ('AICM','Acapulco', 2.5),
+            ('AICM','Bogotá-Colombia', 5), ('AICM','Ciudad Juárez', 4), ('AICM','Guadalajara', 2),
+            ('AICM','Puerto Vallarta', 2), ('AIFA','Mazatlán', 3), ('Mazatlán','Monterrey', 2.5),
+            ('Monterrey','Cancún', 3.5), ('Cancún','Acapulco', 1.5), ('Acapulco','Bogotá-Colombia', 4),
+            ('Bogotá-Colombia','Ciudad Juárez', 6), ('Ciudad Juárez','Guadalajara', 3),
+            ('Guadalajara','Puerto Vallarta', 1.5), ('Puerto Vallarta','Mazatlán', 2),
+            ('AIFA','Monterrey', 2.5), ('AIFA','Puerto Vallarta', 2.5), ('AIFA','Zacatecas', 3.5),
+            ('Zacatecas','Cancún', 4)
+        ]
+        self.vuelos_rapidos_mapa_nodos = ['AICM','AIFA','Monterrey','Zacatecas','Puerto Vallarta','Guadalajara','Ciudad Juárez','Bogotá-Colombia','Acapulco','Cancún','Mazatlán']
+
+        self.puntos_inicio_vuelos_rapidos = { 
+            "a": 'AICM', "b": 'AICM', "c": 'AICM', "d": 'AICM', "e": 'AICM',
+            "f": 'AICM', "g": 'AICM', "h": 'AICM', "i": 'AIFA' 
+        }
+        
         print(f'El objeto {self} ha sido creado')
+        hilo_precarga = threading.Thread(target=self._precargar_datos)
+        hilo_precarga.daemon = True 
+        hilo_precarga.start()
+
+
+    def _obtener_entrada_usuario(self, prompt, opciones_validas):
+        while True:
+            choice = input(prompt).lower()
+            if choice in opciones_validas:
+                return choice
+            else:
+                print("Opción inválida. Por favor, elige una de las opciones disponibles.")
+
+    def _precargar_datos(self):
+        print("\nCargando datos de vuelos en segundo plano... Por favor, espere un momento.")
+        time.sleep(3) 
+        
+        self.carga_finalizada = True
+        print("Carga de datos completada en segundo plano. ¡Listo para volar!")
+
     def presupuesto(self):
         while True:
             try:
@@ -19,26 +136,19 @@ class Volando:
                 break
             except ValueError:
                 print("Ingresa un valor numérico válido para el presupuesto.")
+            
         if self._presupuesto < 7500:
             self.aeropuertos()
             self.menu()
             if self._aeropuerto == "1":
-                self.asIgnacionAIFA()
+                self.asignacionAIFA()
             elif self._aeropuerto == "2":
                 self.asignacionAICM()
         elif self._presupuesto >= 7500:
-            self.vuelosrapidos()
-            self.menu_rapido()
-            if self._vuelosrapidos == "a":
-                self.destinosguardados()
-                self.g.add_edge('AICM','Monterrey',weight=2)
-                self.mostrar_rutarapida(self.g, 'AICM', 'Monterrey')
-            # Aquí podrías agregar más lógica para otros destinos rápidos
+            self.vuelosrapidos() 
         else:
             print("Ingresa caracteres válidos.")
             return self.presupuesto()
-
-        #Aquí puedes meter una excepcion para caracteres que no sean números.
 
     def aeropuertos(self):
         print("En este caso tenemos dos opciones de vuelo, cada una tiene vuelos directos a ciertas\n"
@@ -46,34 +156,16 @@ class Volando:
               "quizá te pida hacer escala en otro país primero. Aunque también está la variante del horario, puede que el que haga escala salga mucho más temprano.")
         print("En cuanto a las opciones de vuelo tenemos son: \n"
               "1. Aeropuerto Internacional Felipe Ángeles (AIFA) en el Estado de México.\n"
-              "2. Aeropuerto Internaciona Ciudad de México (AICM) en Ciudad de México.")
-        while True:
-            self._aeropuerto = input("Necesito que selecciones una de las dos opciones que te di (1 o 2): ")
-            if self._aeropuerto in ["1", "2"]:
-                break
-            else:
-                print("Opción inválida. Por favor, ingresa 1 o 2.")
+              "2. Aeropuerto Internacional Ciudad de México (AICM) en Ciudad de México.")
+        self._aeropuerto = self._obtener_entrada_usuario("Necesito que selecciones una de las dos opciones que te di (1 o 2): ", ["1", "2"])
 
     def menu(self):
         if self._aeropuerto == "1":
             print("Antes de enseñarte el menú de destinos en el orden en el que te los podemos ofertar, te mostraré cual es el mapa del total de recorridos programados para hoy.")
             g_mapa_aifa = nx.Graph()
-
-            g_mapa_aifa.add_nodes_from(['AIFA','Acapulco','Bogota-Colombia','Ciudad Juárez','Monterrey','Ciudad de México','Guadalajara','Zacatecas','Puerto Vallarta','Mazatlan'])
-            g_mapa_aifa.add_edge('AIFA','Acapulco')
-            g_mapa_aifa.add_edge('AIFA','Bogota-Colombia')
-            g_mapa_aifa.add_edge('AIFA','Ciudad Juárez')
-            g_mapa_aifa.add_edge('Acapulco','Monterrey')
-            g_mapa_aifa.add_edge('Acapulco','Ciudad de México')
-            g_mapa_aifa.add_edge('Bogota-Colombia','Guadalajara')
-            g_mapa_aifa.add_edge('Bogota-Colombia','Zacatecas')
-            g_mapa_aifa.add_edge('Ciudad Juárez','Puerto Vallarta')
-            g_mapa_aifa.add_edge('Ciudad Juárez','Mazatlan')
-            g_mapa_aifa.add_edge('Monterrey','Ciudad de México')
-            g_mapa_aifa.add_edge('Ciudad de México','Guadalajara')
-            g_mapa_aifa.add_edge('Guadalajara','Zacatecas')
-            g_mapa_aifa.add_edge('Zacatecas','Puerto Vallarta')
-            g_mapa_aifa.add_edge('Puerto Vallarta','Mazatlan')
+            g_mapa_aifa.add_nodes_from(self.aifa_mapa_completo_nodos)
+            g_mapa_aifa.add_edges_from(self.aifa_mapa_completo_aristas)
+            
             plt.gcf().canvas.manager.set_window_title("Grafo General AIFA")
             plt.figure(figsize=(10, 10))
             nx.draw(g_mapa_aifa, with_labels=True, node_color='Red',edge_color='black',node_size=1000, font_size=12)
@@ -81,39 +173,16 @@ class Volando:
             plt.show()
 
             print("Los destinos disponibles ahora, son: ")
-            print("a) Acapulco")
-            print("b) Bogotá-Colombia")
-            print("c) Ciudad Juárez")
-            print("d) Monterrey")
-            print("e) Ciudad de México")
-            print("f) Guadalajara")
-            print("g) Zacatecas")
-            print("h) Puerto Vallarta")
-            print("i) Mazatlán")
-            while True:
-                self._vueloAIFA = input("Con respecto al menú que te acabo de dar necesito que me des la opción\nque te interesa (a-i): ").lower()
-                if self._vueloAIFA in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
-                    break
-                else:
-                    print("Opción inválida. Por favor, elige una letra del menú.")
+            for key, value in self.aifa_destinos.items():
+                print(f"{key}) {value}")
+            self._vueloAIFA = self._obtener_entrada_usuario("Con respecto al menú que te acabo de dar necesito que me des la opción\nque te interesa (a-i): ", list(self.aifa_destinos.keys()))
+            
         elif self._aeropuerto == "2":
             print("Antes de enseñarte el menú de destinos en el orden en el que te los podemos ofertar, te mostraré cual es el mapa del total de recorridos programados para hoy.")
             g_mapa_aicm = nx.Graph()
-            g_mapa_aicm.add_nodes_from(['AICM','Monterrey','Zacatecas','Puerto Vallarta','Guadalajara','Ciudad Juárez','Ciudad de México','Bogota-Colombia','Acapulco','Cancún'])
-            g_mapa_aicm.add_edge('AICM','Monterrey')
-            g_mapa_aicm.add_edge('Monterrey','Guadalajara')
-            g_mapa_aicm.add_edge('Monterrey','Ciudad Juárez')
-            g_mapa_aicm.add_edge('Guadalajara','Ciudad Juárez')
-            g_mapa_aicm.add_edge('AICM','Zacatecas')
-            g_mapa_aicm.add_edge('Zacatecas','Ciudad de México')
-            g_mapa_aicm.add_edge('Zacatecas','Bogota-Colombia')
-            g_mapa_aicm.add_edge('Ciudad de México','Bogota-Colombia')
-            g_mapa_aicm.add_edge('AICM','Puerto Vallarta')
-            g_mapa_aicm.add_edge('Puerto Vallarta','Acapulco')
-            g_mapa_aicm.add_edge('Puerto Vallarta','Cancún')
-            g_mapa_aicm.add_edge('Acapulco','Cancún')
-            g_mapa_aicm.add_edge('Ciudad Juárez','Ciudad de México')
-            g_mapa_aicm.add_edge('Bogota-Colombia','Acapulco')
+            g_mapa_aicm.add_nodes_from(self.aicm_mapa_completo_nodos)
+            g_mapa_aicm.add_edges_from(self.aicm_mapa_completo_aristas)
+
             plt.gcf().canvas.manager.set_window_title("Grafo General AICM")
             plt.figure(figsize=(10, 10))
             nx.draw(g_mapa_aicm, with_labels=True, node_color='Red',edge_color='black',node_size=1000, font_size=12)
@@ -122,238 +191,158 @@ class Volando:
 
             print("A CONTINUACIÓN TE MOSTRARE EL MENÚ DE DESTINOS DE EL AICM:\n")
             print("Los destinos disponibles ahora, son: ")
-            print("a) Monterrey")
-            print("b) Zacatecas")
-            print("c) Puerto Vallarta")
-            print("d) Guadalajara")
-            print("e) Ciudad Juárez")
-            print("f) Ciudad de México")
-            print("g) Bogotá-Colombia")
-            print("h) Acapulco")
-            print("i) Cancún")
-            while True:
-                self._vueloAICM = input("Con respecto al menú que te acabo de dar necesito que me des la opción\nque te interesa (a-i): ").lower()
-                if self._vueloAICM in ["a", "b", "c", "d", "e", "f", "g", "h", "i"]:
-                    break
-                else:
-                    print("Opción inválida. Por favor, elige una letra del menú.")
+            for key, value in self.aicm_destinos.items():
+                print(f"{key}) {value}")
+            self._vueloAICM = self._obtener_entrada_usuario("Con respecto al menú que te acabo de dar necesito que me des la opción\nque te interesa (a-i): ", list(self.aicm_destinos.keys()))
 
-    def asIgnacionAIFA(self):
+    def asignacionAIFA(self):
         g_vuelo = nx.DiGraph()
-
-        if self._vueloAIFA == "a":
-            g_vuelo.add_edge('AIFA', 'Acapulco', weight=5)
-        elif self._vueloAIFA == "b":
-            g_vuelo.add_edge('AIFA', 'Bogotá-Colombia', weight=3)
-        elif self._vueloAIFA == "c":
-            g_vuelo.add_edge('AIFA', 'Ciudad Juárez', weight=6)
-        elif self._vueloAIFA == "d":
-            g_vuelo.add_edge('AIFA', 'Acapulco', weight=5)
-            g_vuelo.add_edge('Acapulco', 'Monterrey', weight=2)
-        elif self._vueloAIFA == "e":
-            g_vuelo.add_edge('AIFA', 'Acapulco', weight=5)
-            g_vuelo.add_edge('Acapulco', 'Ciudad de México', weight=3)
-        elif self._vueloAIFA == "f":
-            g_vuelo.add_edge('AIFA', 'Bogotá-Colombia', weight=3)
-            g_vuelo.add_edge('Bogotá-Colombia', 'Guadalajara', weight=4)
-        elif self._vueloAIFA == "g":
-            g_vuelo.add_edge('AIFA', 'Bogotá-Colombia', weight=3)
-            g_vuelo.add_edge('Bogotá-Colombia', 'Zacatecas', weight=1)
-        elif self._vueloAIFA == "h":
-            g_vuelo.add_edge('AIFA', 'Ciudad Juárez', weight=6)
-            g_vuelo.add_edge('Ciudad Juárez', 'Puerto Vallarta', weight=3)
-        elif self._vueloAIFA == "i":
-            g_vuelo.add_edge('AIFA', 'Ciudad Juárez', weight=6)
-            g_vuelo.add_edge('Ciudad Juárez', 'Mazatlán', weight=3)
+        
+        selected_route_edges = self.aifa_rutas.get(self._vueloAIFA)
+        
+        if selected_route_edges:
+            for source, target, weight in selected_route_edges:
+                g_vuelo.add_edge(source, target, weight=weight)
+            self.mostrar_grafo(g_vuelo, "AIFA")
         else:
-            print("La opción que elegiste no es válida.")
+            print("La opción que elegiste no es válida o no tiene rutas definidas.")
             return
-
-        self.mostrar_grafo(g_vuelo, "AIFA")
 
     def asignacionAICM(self):
         g_vuelo = nx.DiGraph()
+        
+        selected_route_edges = self.aicm_rutas.get(self._vueloAICM)
 
-        if self._vueloAICM == "a":
-            g_vuelo.add_edge('AICM', 'Monterrey', weight=3)
-        elif self._vueloAICM == "b":
-            g_vuelo.add_edge('AICM', 'Zacatecas', weight=3)
-        elif self._vueloAICM == "c":
-            g_vuelo.add_edge('AICM', 'Puerto Vallarta', weight=2)
-        elif self._vueloAICM == "d":
-            g_vuelo.add_edge('AICM', 'Monterrey', weight=3)
-            g_vuelo.add_edge('Monterrey', 'Guadalajara', weight=2)
-        elif self._vueloAICM == "e":
-            g_vuelo.add_edge('AICM', 'Monterrey', weight=3)
-            g_vuelo.add_edge('Monterrey', 'Ciudad Juárez', weight=4)
-        elif self._vueloAICM == "f":
-            g_vuelo.add_edge('AICM', 'Zacatecas', weight=3)
-            g_vuelo.add_edge('Zacatecas', 'Ciudad de México', weight=5)
-        elif self._vueloAICM == "g":
-            g_vuelo.add_edge('AICM', 'Zacatecas', weight=3)
-            g_vuelo.add_edge('Zacatecas', 'Bogotá-Colombia', weight=6)
-        elif self._vueloAICM == "h":
-            g_vuelo.add_edge('AICM', 'Puerto Vallarta', weight=2)
-            g_vuelo.add_edge('Puerto Vallarta', 'Acapulco', weight=7)
-        elif self._vueloAICM == "i":
-            g_vuelo.add_edge('AICM', 'Puerto Vallarta', weight=2)
-            g_vuelo.add_edge('Puerto Vallarta', 'Cancún', weight=2)
+        if selected_route_edges:
+            for source, target, weight in selected_route_edges:
+                g_vuelo.add_edge(source, target, weight=weight)
+            self.mostrar_grafo(g_vuelo, "AICM")
         else:
-            print("La opción que elegiste no es válida.")
+            print("La opción que elegiste no es válida o no tiene rutas definidas.")
             return
 
-        self.mostrar_grafo(g_vuelo, "AICM")
     def vuelosrapidos(self):
-      print("A continuación necesito que de los siguientes destinos me digas a donde quieres ir,\n nosotros nos encargaremos de asignarte la ruta más rapida con respecto al tiempo diagnosticado.\n")
-      self.g_mapa_rapido = nx.Graph()
-      self.g_mapa_rapido.add_nodes_from(['AICM','AIFA','Monterrey','Zacatecas','Puerto Vallarta','Guadalajara','Ciudad Juárez','Bogota-Colombia','Acapulco','Cancún','Mazatlán'])
-      self.g_mapa_rapido.add_edge('AICM','AIFA')
-      self.g_mapa_rapido.add_edge('AICM','Zacatecas')
-      self.g_mapa_rapido.add_edge('AICM','Cancún')
-      self.g_mapa_rapido.add_edge('AICM','Acapulco')
-      self.g_mapa_rapido.add_edge('AICM','Bogota-Colombia')
-      self.g_mapa_rapido.add_edge('AICM','Ciudad Juárez')
-      self.g_mapa_rapido.add_edge('AICM','Guadalajara')
-      self.g_mapa_rapido.add_edge('AICM','Puerto Vallarta')
-      self.g_mapa_rapido.add_edge('AIFA','Mazatlán')
-      self.g_mapa_rapido.add_edge('Mazatlán','Monterrey')
-      self.g_mapa_rapido.add_edge('Monterrey','Cancún')
-      self.g_mapa_rapido.add_edge('Cancún','Acapulco')
-      self.g_mapa_rapido.add_edge('Acapulco','Bogota-Colombia')
-      self.g_mapa_rapido.add_edge('Bogota-Colombia','Ciudad Juárez')
-      self.g_mapa_rapido.add_edge('Ciudad Juárez','Guadalajara')
-      self.g_mapa_rapido.add_edge('Guadalajara','Puerto Vallarta')
-      self.g_mapa_rapido.add_edge('Puerto Vallarta','Mazatlán')
-      self.g_mapa_rapido.add_edge('AIFA','Monterrey')
-      self.g_mapa_rapido.add_edge('AIFA','Puerto Vallarta')
-      self.g_mapa_rapido.add_edge('AIFA','Zacatecas')
-      self.g_mapa_rapido.add_edge('Zacatecas','Cancún')
-      plt.gcf().canvas.manager.set_window_title("Grafo General Vuelos Rápidos")
-      plt.figure(figsize=(12, 12))
-      nx.draw(self.g_mapa_rapido, with_labels=True, node_color='Red',edge_color='black',node_size=1000, font_size=12)
-      plt.title("Grafo General de Vuelos Rápidos\n Oziel Caballero")
-      plt.show()
-      self.menu_rapido()
+        print("A continuación necesito que de los siguientes destinos me digas a donde quieres ir,\n nosotros nos encargaremos de asignarte la ruta más rapida con respecto al tiempo diagnosticado.\n")
+        
+        self.g_mapa_rapido = nx.Graph()
+        self.g_mapa_rapido.add_nodes_from(self.vuelos_rapidos_mapa_nodos)
+        
+        for u, v, weight in self.vuelos_rapidos_mapa_aristas:
+            self.g_mapa_rapido.add_edge(u, v, weight=weight) 
+
+        plt.gcf().canvas.manager.set_window_title("Grafo General Vuelos Rápidos")
+        plt.figure(figsize=(12, 12))
+        nx.draw(self.g_mapa_rapido, with_labels=True, node_color='Red',edge_color='black',node_size=1000, font_size=12)
+        
+        edge_labels = nx.get_edge_attributes(self.g_mapa_rapido, 'weight')
+        nx.draw_networkx_edge_labels(self.g_mapa_rapido, nx.spring_layout(self.g_mapa_rapido), edge_labels=edge_labels)
+        
+        plt.title("Grafo General de Vuelos Rápidos\n Oziel Caballero")
+        plt.show()
+        
+        self.menu_rapido() 
+
     def menu_rapido(self):
-      print("           MENÚ DE DESTINOS")
-      print("           a) Monterrey")
-      print("           b) Zacatecas")
-      print("           c) Puerto Vallarta")
-      print("           d) Guadalajara")
-      print("           e) Ciudad Juárez")
-      print("           f) Bogota-Colombia")
-      print("           g) Acapulco")
-      print("           h) Cancún")
-      print("           i) Mazatlan")
-      print("           j) Ciudad de México")
-      print("           k) Estado de México")
-      while True:
-          self._vuelosrapidos = input("Con respecto al menú que te acabo de dar necesito que me des la opción\nque te interesa (a-k): ").lower()
-          if self._vuelosrapidos in ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"]:
-              break
-          else:
-              print("Opción inválida. Por favor, elige una letra del menú.")
+        print("           MENÚ DE DESTINOS")
+        for key, value in self.destinos_vuelos_rapidos.items():
+            print(f"           {key}) {value}")
+        
+        self._vuelosrapidos = self._obtener_entrada_usuario("Con respecto al menú que te acabo de dar necesito que me des la opción\nque te interesa (a-k): ", list(self.destinos_vuelos_rapidos.keys()))
+        
+        destino_elegido = self.destinos_vuelos_rapidos.get(self._vuelosrapidos)
 
-      if self._vuelosrapidos == "a":
-          origen = 'AICM'
-          destino = 'Monterrey'
-      elif self._vuelosrapidos == "b":
-          origen = 'AICM'
-          destino = 'Zacatecas'
-      elif self._vuelosrapidos == "c":
-          origen = 'AICM'
-          destino = 'Puerto Vallarta'
-      elif self._vuelosrapidos == "d":
-          origen = 'AICM'
-          destino = 'Guadalajara'
-      elif self._vuelosrapidos == "e":
-          origen = 'AICM'
-          destino = 'Ciudad Juárez'
-      elif self._vuelosrapidos == "f":
-          origen = 'AICM'
-          destino = 'Bogota-Colombia'
-      elif self._vuelosrapidos == "g":
-          origen = 'AICM'
-          destino = 'Acapulco'
-      elif self._vuelosrapidos == "h":
-          origen = 'AICM'
-          destino = 'Cancún'
-      elif self._vuelosrapidos == "i":
-          origen = 'AIFA' # Asumiendo que Mazatlán es más rápido desde AIFA
-          destino = 'Mazatlán'
-      elif self._vuelosrapidos == "j":
-          print("Por favor, especifica un destino diferente a Ciudad de México para un vuelo rápido.")
-          return self.menu_rapido()
-      elif self._vuelosrapidos == "k":
-          print("Por favor, especifica un destino diferente al Estado de México para un vuelo rápido.")
-          return self.menu_rapido()
-      else:
-          return
+        if destino_elegido == "Ciudad de México":
+            print("Por favor, especifica un destino diferente a Ciudad de México para un vuelo rápido.")
+            return self.menu_rapido()
+        elif destino_elegido == "Estado de México":
+            print("Por favor, especifica un destino diferente al Estado de México para un vuelo rápido.")
+            return self.menu_rapido()
+        
+        origen = self.puntos_inicio_vuelos_rapidos.get(self._vuelosrapidos)
+        destino = destino_elegido
 
-      self.mostrar_ruta_en_grafo(self.g_mapa_rapido, origen, destino)
-
+        if origen and destino:
+            self.mostrar_ruta_en_grafo(self.g_mapa_rapido, origen, destino)
+        else:
+            print("No se pudo determinar el origen o destino para el vuelo rápido. Intenta de nuevo.")
 
     def destinosguardados(self):
-      pass
+        pass 
 
     def mostrar_grafo(self, g, aeropuerto):
-      plt.figure(figsize=(5, 5))
-      pos = nx.spring_layout(g)#Es para asegurarse de que los nodos en cuanto a su visualización queden bien distribuidos.
-      nx.draw(g, pos, with_labels=True, arrows=True, node_color='green', edge_color='yellow',node_size=1500, font_size=12)
-      edge_labels = nx.get_edge_attributes(g, 'weight')
-      edge_labels = {k: f"{v} hrs" for k, v in edge_labels.items()}
-      nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels, font_size=8)#edge_labels=edge_labels, digamos que es un:"En el espacio que necesita la función (edge_labels), ponle lo que tengo guardado en mi cajita (edge_labels)."
-      plt.title(f"Vuelo - {aeropuerto}\n Oziel Caballero")
-      plt.show()
-
+        plt.figure(figsize=(5, 5))
+        pos = nx.spring_layout(g)
+        nx.draw(g, pos, with_labels=True, arrows=True, node_color='green', edge_color='yellow',node_size=1500, font_size=12)
+        edge_labels = nx.get_edge_attributes(g, 'weight')
+        edge_labels = {k: f"{v} hrs" for k, v in edge_labels.items()}
+        nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels, font_size=8)
+        plt.title(f"Vuelo - {aeropuerto}\n Oziel Caballero")
+        plt.show()
 
     def mostrar_rutarapida(self, g, source, target):
-      try:
-          ruta_corta = nx.dijkstra_path(g, source=source, target=target, weight='weight')
-          print(f"Ruta más corta de {source} a {target}:", " → ".join(ruta_corta))
+        try:
+            ruta_corta = nx.dijkstra_path(g, source=source, target=target, weight='weight')
+            total_weight = nx.dijkstra_path_length(g, source=source, target=target, weight='weight')
+            print(f"Ruta más corta de {source} a {target}:", " → ".join(ruta_corta))
+            print(f"Tiempo total estimado: {total_weight} horas")
 
-          aristas_en_ruta = list(zip(ruta_corta[:-1], ruta_corta[1:]))
-          color_nodos = ['red' if nodo in ruta_corta else 'lightgray' for nodo in g.nodes()]
+            aristas_en_ruta = list(zip(ruta_corta[:-1], ruta_corta[1:]))
+            color_nodos = ['red' if nodo in ruta_corta else 'lightgray' for nodo in g.nodes()]
 
-          pos = nx.spring_layout(g, seed=42)
-          plt.figure(figsize=(8, 6))
-          nx.draw(g, pos, with_labels=True, node_color=color_nodos,
-                  edge_color='gray', node_size=2000, font_size=15, font_weight='bold')
+            pos = nx.spring_layout(g, seed=42)
+            plt.figure(figsize=(8, 6))
+            nx.draw(g, pos, with_labels=True, node_color=color_nodos,
+                     edge_color='gray', node_size=2000, font_size=15, font_weight='bold')
 
-          edge_labels = nx.get_edge_attributes(g, 'weight')
-          nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels)
+            edge_labels = nx.get_edge_attributes(g, 'weight')
+            nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels)
 
-          nx.draw_networkx_edges(g, pos, edgelist=aristas_en_ruta, edge_color='red', width=4)
+            nx.draw_networkx_edges(g, pos, edgelist=aristas_en_ruta, edge_color='red', width=4)
 
-          plt.title(f"Grafo No Dirigido con Ruta Más Corta ({source} → {target})")
-          plt.show()
-      except nx.NetworkXNoPath:
-          print(f"No existe una ruta entre {source} y {target}.")
-      except nx.NetworkXError as e:
-          print(f"Ocurrió un error al calcular la ruta: {e}")
+            plt.title(f"Grafo No Dirigido con Ruta Más Corta ({source} → {target})\n Oziel Caballero")
+            plt.show()
+        except nx.NetworkXNoPath:
+            print(f"No existe una ruta entre {source} y {target}.")
+        except nx.NetworkXError as e:
+            print(f"Ocurrió un error al calcular la ruta: {e}")
 
     def mostrar_ruta_en_grafo(self, g, source, target):
-      try:
-          ruta_corta = nx.dijkstra_path(g, source=source, target=target, weight='weight')
-          aristas_en_ruta = list(zip(ruta_corta[:-1], ruta_corta[1:]))
-          color_nodos = ['lightgray'] * len(g.nodes())
-          nodos_dict = {node: i for i, node in enumerate(g.nodes())}
-          for nodo in ruta_corta:
-              if nodo in nodos_dict:
-                  color_nodos[nodos_dict[nodo]] = 'red'
+        try:
+            ruta_corta = nx.dijkstra_path(g, source=source, target=target, weight='weight')
+            total_weight = nx.dijkstra_path_length(g, source=source, target=target, weight='weight')
+            print(f"Ruta más corta de {source} a {target}:", " → ".join(ruta_corta))
+            print(f"Tiempo total estimado: {total_weight} horas")
 
-          pos = nx.spring_layout(g, seed=42)
-          plt.figure(figsize=(12, 12))
-          nx.draw(g, pos, with_labels=True, node_color=color_nodos,
-                  edge_color='black', node_size=1000, font_size=12)
-          nx.draw_networkx_edges(g, pos, edgelist=aristas_en_ruta, edge_color='red', width=4)
-          plt.title(f"Ruta Rápida en el Grafo General ({source} → {target})\nOziel Caballero")
-          plt.show()
+            aristas_en_ruta = []
+            for i in range(len(ruta_corta) - 1):
+                u, v = ruta_corta[i], ruta_corta[i+1]
+                if g.has_edge(u, v):
+                    aristas_en_ruta.append((u,v))
+                elif g.has_edge(v, u): 
+                    aristas_en_ruta.append((v,u))
+            
+            color_nodos = ['lightgray'] * len(g.nodes())
+            nodos_list = list(g.nodes()) 
+            for nodo in ruta_corta:
+                if nodo in nodos_list:
+                    color_nodos[nodos_list.index(nodo)] = 'red'
 
-      except nx.NetworkXNoPath:
-          print(f"No existe una ruta entre {source} y {target}.")
-      except nx.NetworkXError as e:
-          print(f"Ocurrió un error al calcular la ruta: {e}")
+            pos = nx.spring_layout(g, seed=42)
+            plt.figure(figsize=(12, 12))
+            nx.draw(g, pos, with_labels=True, node_color=color_nodos,
+                     edge_color='black', node_size=1000, font_size=12)
+            
+            edge_labels = nx.get_edge_attributes(g, 'weight')
+            nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels, font_size=8)
+
+            nx.draw_networkx_edges(g, pos, edgelist=aristas_en_ruta, edge_color='red', width=4)
+            plt.title(f"Ruta Rápida en el Grafo General ({source} → {target})\nOziel Caballero")
+            plt.show()
+
+        except nx.NetworkXNoPath:
+            print(f"No existe una ruta entre {source} y {target}.")
+        except nx.NetworkXError as e:
+            print(f"Ocurrió un error al calcular la ruta: {e}")
 
 if __name__ == '__main__':
     g = Volando()
